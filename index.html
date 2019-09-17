@@ -1,0 +1,499 @@
+<html>
+<head>
+    <title>Zillion Coders</title>
+    <link rel="stylesheet" href="css/materialize.css">
+    <link rel="stylesheet" href="css/speech-input.css">
+    <script src="js/materialize.js"></script>
+    <script src="js/three.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/predef.js"></script>
+    <style>
+        .nav-wrapper {
+            padding-left: 24px;
+            padding-right: 24px;
+        }
+
+        body {
+            background: #eeeeee;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%
+        }
+        input {
+            width: 100% !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar-fixed">
+        <nav>
+            <div class="teal lighten-1 nav-wrapper">
+                <a href="#!" class="brand-logo">ZILLION Coders</a>
+            </div>
+        </nav>
+    </div>
+
+    <div class="row" style="position: absolute; left:50; right:50; bottom: 0; top: 88;">
+
+        <div class="col s8" style="position:relative;height:100%; padding-right: 24px;">
+            <h5>3D Model</h5>
+            <div class="card z-depth-2" id="container"
+                style="position: absolute;left:12;right:12; bottom:12; top:48; padding:24px;">
+
+            </div>
+        </div>
+
+        <div class="col s4">
+            <form class="form" id="form" style="position: absolute; right:-900px;  bottom: 0; top: 88;">
+              PLA Temperature : <input type="text" id="t">
+              Printing speed : <input type="text" id ="p">  
+              Bed Temperature : <input type="text" id ="b">
+              Layer Thickness : <input type="text" id = "l">
+                <button id="btn" class="btn waves-effect waves-light" style="margin-top:60px;">Display</button>
+
+                
+            </form>
+
+            <div id="h1" style="margin-top:400px; margin-left:50PX;"></div>
+        </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        //TODO: handle inputs such as through an angle
+        //TODO: handle move input
+        //TODO: handle decimal inputs
+        //TODO: it type inputs
+        //TODO: remove type inputs [clear]
+        //TODO: identify objects with number
+
+
+        var objects = [];
+
+        var container = document.getElementById('container');
+        var text = document.getElementById('text');
+
+        var scene = new THREE.Scene();
+        var camera = new THREE.OrthographicCamera(-container.offsetWidth / 100, container.offsetWidth / 100, container.offsetHeight / 100, -container.offsetHeight / 100, -1000000000, 10000000000000);
+        //var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(container.offsetWidth - 48, container.offsetHeight - 48);
+        container.appendChild(renderer.domElement);
+
+        scene.background = new THREE.Color(1, 1, 1);
+
+        var light = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(light);
+
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        camera.position.z = 1;
+
+        
+
+        renderer.render(scene, camera);
+            document.getElementById("btn").addEventListener("click", function(event) {
+
+    var message = document.getElementById("t").value;
+    var printing = document.getElementById("p").value;
+    var  bed = document.getElementById("b").value;
+    var layer =  document.getElementById("l").value;
+        event.preventDefault();
+
+    if(message>=190  && message <=230 && printing>=30 && printing <=90 && bed>=25 && bed <=55 && layer>=0.1 && layer<=0.4){
+                        document.getElementById('h1').innerHTML="<h6>This material can be used in this temperature</h6>";
+                        var material = new THREE.MeshLambertMaterial({ color: 'black', wireframe: true });
+                        var cube = new THREE.Mesh(geometry, material);
+
+                    cube.position.x = 0;
+                    cube.position.y = 0;
+
+                    scene.add(cube);
+                    }
+                    else{
+                        document.getElementById('h1').innerHTML="<h6>material at this temperature cannot be used  </h6>";
+                        var material = new THREE.MeshLambertMaterial({ color: 'orange', wireframe: true });
+                        var cube = new THREE.Mesh(geometry, material);
+
+                    cube.position.x = 0;
+                    cube.position.y = 0;
+
+                    scene.add(cube);
+                    }
+});
+
+
+
+var geometry = new THREE.BoxGeometry(1,2,3);
+                    
+                    
+                    
+
+        var animate = function () {
+            requestAnimationFrame(animate);
+
+            objects.forEach((object) => {
+                if (object.hasOwnProperty('rotation')) {
+
+                    switch (object.rotation) {
+
+                        case 'x':
+
+                            object.actual.position.y = object.actual.position.y * Math.cos(0.01) - object.actual.position.z * Math.sin(0.01);
+                            object.actual.position.z = object.actual.position.y * Math.sin(0.01) + object.actual.position.z * Math.cos(0.01);
+                            object.actual.rotation.x += 0.01;
+                            break;
+
+                        case 'y':
+                            object.actual.position.z = object.actual.position.z * Math.cos(0.01) - object.actual.position.x * Math.sin(0.01);
+                            object.actual.position.x = object.actual.position.z * Math.sin(0.01) + object.actual.position.x * Math.cos(0.01);
+                            object.actual.rotation.y += 0.01;
+                            break;
+
+                        case 'z':
+                            object.actual.position.x = object.actual.position.x * Math.cos(0.01) - object.actual.position.y * Math.sin(0.01);
+                            object.actual.position.y = object.actual.position.x * Math.sin(0.01) + object.actual.position.y * Math.cos(0.01);
+                            object.actual.rotation.z += 0.01;
+                            break;
+
+                    }
+
+                }
+            })
+
+            renderer.render(scene, camera);
+        };
+
+          createCube(3,2,5,2,3);
+          
+            createSphere(1,1,1);
+            //createSphere(0,0,2);
+            //createSphere(0,0,3);
+           // createSphere(0,0,4);
+
+            //createSphere(0,0,5);
+           // createSphere(0,0,6);
+            // createSphere(3,1,1);
+            // createSphere(4,2,1);
+           
+            
+        function createObject(object) {
+
+            console.log(object);
+
+            switch (object.shape) {
+
+                case 'box':
+
+                    var geometry = new THREE.BoxGeometry(object.size.x, object.size.y, object.size.z);
+                    var material = new THREE.MeshLambertMaterial({ color: object.color, wireframe: true });
+                    var cube = new THREE.Mesh(geometry, material);
+
+                    cube.position.x = object.position.x;
+                    cube.position.y = object.position.y;
+
+                    scene.add(cube);
+
+                    object.actual = cube;
+
+                    animate();
+
+                    break;
+
+                case 'sphere':
+
+                    var geometry = new THREE.SphereGeometry(object.size.x, 24, 16);
+                    var material = new THREE.MeshLambertMaterial({ color: object.color, wireframe: true });
+                    var sphere = new THREE.Mesh(geometry, material);
+
+                    sphere.position.x = object.position.x;
+                    sphere.position.y = object.position.y;
+
+                    scene.add(sphere);
+
+                    object.actual = sphere;
+
+                    animate();
+
+                    break;
+
+                case 'cylinder':
+
+                    var geometry = new THREE.CylinderGeometry(object.size.x / 2, object.size.x / 2, object.size.y, 12, 5);
+                    var material = new THREE.MeshLambertMaterial({ color: 'red', wireframe: true });
+                    var sphere = new THREE.Mesh(geometry, material);
+
+                    sphere.position.x = object.position.x;
+                    sphere.position.y = object.position.y;
+
+                    scene.add(sphere);
+
+                    object.actual = sphere;
+
+                    animate();
+
+                    break;
+            }
+        }
+
+        function createCall(cont) {
+
+            var object = {
+                color: colors[0],
+                size: { x: 2, y: 2, z: 2 },
+                position: { x: 0, y: 0 }
+            };
+
+            var positionRegex = /at \(*\-*\d+\s*,*\s*\-*\d+\)*/g;
+            var nameRegex = /called \w+/g;
+            var radiusRegex = /radius \d+/g;
+            var lengthRegex = /length \d+/g;
+            var breadthRegex = /breadth \d+/g;
+            var widthRegex = /width \d+/g;
+            var heightRegex = /height \d+/g;
+
+            var res = cont.match(positionRegex);
+            if (res) {
+                var pos = res[0];
+                pos = pos.replace('(', ' ').replace(')', ' ').replace(',', ' ').replace(/\s+/g, ' ');
+                var coord = pos.split(' ');
+
+                object.position = { x: coord[1], y: coord[2] };
+            }
+
+            res = cont.match(nameRegex);
+            if (res)
+                object.name = res[0].split(' ')[1];
+
+            shapes.forEach((elt) => {
+                if (cont.includes(elt)) {
+                    object.shape = elt;
+                }
+            });
+
+            for (var key in colors) {
+                if (cont.includes(key))
+                    object.color = colors[key];
+            }
+            for (var key in size) {
+                if (cont.includes(key))
+                    object.size = size[key];
+            }
+
+            res = cont.match(radiusRegex);
+            if (res) {
+                var rad = res[0].split(' ')[1];
+                object.size = { x: rad, y: rad, z: rad };
+            }
+
+            res = cont.match(lengthRegex);
+            if (res)
+                object.size.x = res[0].split(' ')[1];
+
+
+            res = cont.match(widthRegex);
+            if (res)
+                object.size.z = res[0].split(' ')[1];
+
+
+            res = cont.match(breadthRegex);
+            if (res)
+                object.size.z = res[0].split(' ')[1];
+
+
+            res = cont.match(heightRegex);
+            if (res)
+                object.size.y = res[0].split(' ')[1];
+
+            createObject(object);
+            objects.push(object);
+        }
+
+
+
+        function rotateRegexMatch(str) {
+            var nameRegex = /rotate\s*\w+\s*/g;
+            var aboutRegex = /about\s*\w+\s*/g;
+            var angleRegex = /through\s*\w+\s*/g;
+
+            var res = str.match(nameRegex);
+
+            if (res) {
+
+                var name = res[0].replace(/\s+/g, ' ').split(' ')[1];
+
+                res = str.match(aboutRegex);
+                if (res)
+                    var axis = res[0].replace(/\s+/g, ' ').split(' ')[1];
+
+                res = str.match(angleRegex);
+                if (res)
+                    var angle = res[0].replace(/\s+/g, ' ').split(' ')[1];
+
+                return { name: name, axis: axis, angle: angle };
+
+            }
+
+        }
+
+        function returnObject(name) {
+            for (var key in objects) {
+                if (objects[key].name == name)
+                    return objects[key];
+            }
+        }
+
+        function rotateOnceCall(cont) {
+
+            var temp = rotateRegexMatch(cont);
+
+            var object = returnObject(temp.name);
+
+            object.actual.rotation[temp.axis || 'z'] += temp.angle * 2 * Math.PI / 360;
+
+            animate();
+
+        }
+
+        function continuousRotateCall(cont) {
+
+            var temp = rotateRegexMatch(cont);
+
+            returnObject(temp.name).rotation = temp.axis;
+
+        }
+
+        function submitted() {
+
+            var cont = document.getElementById('input').value;
+            cont = cont.toLowerCase();
+            console.log(cont);
+            document.getElementById('input').value = "";
+
+            if (cont.includes("create")) {
+                createCall(cont);
+                return;
+            }
+
+            if (cont.includes("continuously") && cont.includes("rotate")) {
+                continuousRotateCall(cont);
+                return;
+            } else if (cont.includes("rotate")) {
+                rotateOnceCall(cont);
+                return;
+            }
+
+            //if (cont.includes("move"))
+
+            /*if (cont.includes("create") && cont.includes("cube")) {
+ 
+                var re = /\(\d\,\d\)+/g;
+                var pos = cont.match(re);
+ 
+                if (!pos) {
+                    createCube();
+                    document.getElementById("text").innerHTML += "Cube at (0,0)<br>";
+                } else {
+                    createCube(pos[0][1], pos[0][3]);
+                    document.getElementById("text").innerHTML += `Cube at (${pos[0][1]},${pos[0][3]})<br>`;
+                }
+ 
+            }
+ 
+            if (cont.includes("create") && cont.includes("sphere")) {
+ 
+                var re = /\(\d\,\d\)+/g;
+                var pos = cont.match(re);
+ 
+                if (!pos) {
+                    createSphere();
+                    document.getElementById("text").innerHTML += "Sphere at (0,0)<br>";
+                } else {
+                    createSphere(pos[0][1], pos[0][3]);
+                    document.getElementById("text").innerHTML += `Sphere at (${pos[0][1]},${pos[0][3]})<br>`;
+                }
+            }*/
+        }
+
+        function createCube(x,y,l,b,h) {
+
+            var geometry = new THREE.BoxGeometry(l,b,h);
+            var material = new THREE.MeshBasicMaterial({ color: 0xe51c23, wireframe: true });
+            var cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            if (x) {
+                cube.position.x = parseInt(x);
+                cube.position.y = parseInt(y);
+            }
+
+            camera.position.z = 1;
+
+            cube.rotation.x = 0.2;
+            cube.rotation.y = 0;
+
+            var animate = function () {
+                requestAnimationFrame(animate);
+
+                //cube.rotation.y += 0.1;
+
+                renderer.render(scene, camera);
+            };
+
+            animate();
+
+        }
+
+        function createSphere(a, b, radius) {
+
+            var geometry = new THREE.SphereGeometry(radius, 12, 8);
+            var material = new THREE.MeshBasicMaterial({ color: 0x2196F3, wireframe: true });
+            var cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            scene.background = new THREE.Color(1, 1, 1)
+
+            if (a) {
+                cube.position.x = parseInt(a);
+                cube.position.y = parseInt(b);
+            }
+
+            camera.position.z = 5;
+
+            cube.rotation.x = 0.2;
+            cube.rotation.y = 0;
+
+            var animate = function () {
+                requestAnimationFrame(animate);
+
+                //cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+
+                renderer.render(scene, camera);
+            };
+
+            animate();
+        }
+
+        function pickRandomProperty(obj) {
+            var result;
+            var count = 0;
+            for (var prop in obj)
+                if (Math.random() < 1 / ++count)
+                    result = prop;
+            return result;
+        }
+
+    </script>
+
+    <script src="js/speech-input.js"></script>
+</body>
+
+</html>
